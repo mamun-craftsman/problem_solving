@@ -1,0 +1,1 @@
+{"name":"Local: g","url":"c:\\Users\\HP\\OneDrive\\Documents\\problem_solving\\g.cpp","tests":[{"id":1763114811461,"input":"3\nabracadabra\\0abraka\nabracadabra\\0abraka\na\\0b\n","output":"19 11\n19 11"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\HP\\OneDrive\\Documents\\problem_solving\\g.cpp","group":"local","local":true}

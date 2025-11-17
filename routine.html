@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weekly Routine Planner (Thu–Fri weekend)</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;--white:#e6eef6}
+    body{font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial; background:linear-gradient(180deg,#071024 0%, #07182b 100%); color:var(--white); margin:0; padding:24px}
+    .container{max-width:1100px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{font-size:20px;margin:0}
+    p.lead{color:var(--muted);margin:4px 0 0}
+    .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+    .day{background:var(--card);border-radius:10px;padding:12px;min-height:380px;display:flex;flex-direction:column}
+    .day.weekend{outline:2px dashed rgba(6,182,212,0.08)}
+    .day h3{margin:0 0 8px;font-size:14px}
+    .block{background:linear-gradient(90deg, rgba(6,182,212,0.12), rgba(99,102,241,0.06));border-radius:8px;padding:8px;margin-bottom:8px;border-left:4px solid rgba(6,182,212,0.9)}
+    .small{font-size:13px;color:var(--muted)}
+    .time{font-weight:600}
+    footer{margin-top:16px;display:flex;gap:8px}
+    button{background:var(--accent);border:none;padding:10px 12px;border-radius:8px;color:#04202a;cursor:pointer;font-weight:600}
+    .controls{display:flex;gap:8px;align-items:center}
+    select,input[type=time]{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white);padding:6px;border-radius:6px}
+    .note{color:var(--muted);font-size:13px;margin-top:10px}
+    @media (max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.day{min-height:200px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Weekly Routine Planner — (Weekend: Thu & Fri)</h1>
+        <p class="lead">Schedule built around 9:00–17:00 classes and 8+ hours sleep. Edit times and export to CSV/Excel.</p>
+      </div>
+      <div class="controls">
+        <label class="small">Weekend:</label>
+        <select id="weekendSelect">
+          <option value="thu-fri">Thu & Fri</option>
+          <option value="sat-sun">Sat & Sun</option>
+          <option value="custom">Custom</option>
+        </select>
+        <button id="exportBtn">Export CSV</button>
+      </div>
+    </header>
+
+    <div class="grid" id="weekGrid"></div>
+
+    <footer>
+      <button id="resetBtn">Reset to default</button>
+      <div class="note">Tip: Click any block to edit its title/time. Drag not supported — this is a compact planner for printing/export.</div>
+    </footer>
+  </div>
+
+  <script>
+    const defaultTemplate = {
+      sleep: {label:'Sleep', time:'00:00 - 08:00', note:'8+ hours'},
+      wake:{label:'Wake & Breakfast', time:'06:00 - 07:00'},
+      german:{label:'German (A1→A2)', time:'07:00 - 08:00'},
+      class:{label:'University (9:00 - 17:00)', time:'09:00 - 17:00'},
+      break:{label:'Break / Wife time', time:'17:00 - 18:00'},
+      course:{label:'Courses (1.5h)', time:'18:00 - 19:30'},
+      project:{label:'Project / Deployment (1.5h)', time:'20:00 - 21:30'},
+      leetcode:{label:'LeetCode (30m)', time:'21:30 - 22:00'},
+      chill:{label:'Chill & sleep prep', time:'22:00 - 23:00'}
+    };
+
+    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    let weekend = ['Thu','Fri'];
+
+    const weekGrid = document.getElementById('weekGrid');
+    function renderWeek(){
+      weekGrid.innerHTML='';
+      days.forEach(day=>{
+        const container = document.createElement('div');
+        container.className = 'day ' + (weekend.includes(day)?'weekend':'');
+        const h3 = document.createElement('h3');
+        h3.textContent = day + (weekend.includes(day) ? ' (Weekend)' : '');
+        container.appendChild(h3);
+
+        if(!weekend.includes(day)){
+          // Class day template
+          appendBlock(container, defaultTemplate.wake);
+          appendBlock(container, defaultTemplate.german);
+          appendBlock(container, defaultTemplate.class);
+          appendBlock(container, defaultTemplate.break);
+          appendBlock(container, defaultTemplate.course);
+          appendBlock(container, defaultTemplate.project);
+          appendBlock(container, defaultTemplate.leetcode);
+          appendBlock(container, defaultTemplate.chill);
+        } else {
+          // Weekend template (Thu & Fri leisure + extra project time)
+          appendBlock(container, {label:'Sleep in / Rest', time:'08:00 - 10:00'});
+          appendBlock(container, {label:'Deep Project Work (2h)', time:'10:00 - 12:00'});
+          appendBlock(container, {label:'Lunch / Wife time', time:'12:00 - 13:00'});
+          appendBlock(container, {label:'Courses (2h)', time:'13:00 - 15:00'});
+          appendBlock(container, {label:'LeetCode (1h)', time:'15:00 - 16:00'});
+          appendBlock(container, {label:'Portfolio / GitHub (2h)', time:'16:00 - 18:00'});
+        }
+
+        weekGrid.appendChild(container);
+      });
+    }
+
+    function appendBlock(parent, item){
+      const b = document.createElement('div');
+      b.className = 'block';
+      b.innerHTML = '<div class="time">'+ item.time +'</div><div class="small">'+ item.label +'</div>';
+      b.addEventListener('click', ()=> editBlock(b, item));
+      parent.appendChild(b);
+    }
+
+    function editBlock(blockEl, item){
+      const newLabel = prompt('Edit label', item.label);
+      if(newLabel === null) return;
+      const newTime = prompt('Edit time', item.time);
+      if(newTime === null) return;
+      item.label = newLabel;
+      item.time = newTime;
+      blockEl.querySelector('.time').textContent = newTime;
+      blockEl.querySelector('.small').textContent = newLabel;
+    }
+
+    document.getElementById('weekendSelect').addEventListener('change', (e)=>{
+      const v = e.target.value;
+      if(v==='thu-fri') weekend = ['Thu','Fri'];
+      else if(v==='sat-sun') weekend = ['Sat','Sun'];
+      else {
+        const custom = prompt('Enter weekend days separated by comma (e.g. Thu,Fri)');
+        if(custom){
+          weekend = custom.split(',').map(s=>s.trim().slice(0,3));
+        }
+      }
+      renderWeek();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      weekend = ['Thu','Fri'];
+      document.getElementById('weekendSelect').value = 'thu-fri';
+      renderWeek();
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', ()=>{
+      const rows = [];
+      const dayCols = weekGrid.querySelectorAll('.day');
+      dayCols.forEach(dayCol=>{
+        const day = dayCol.querySelector('h3').textContent;
+        const blocks = dayCol.querySelectorAll('.block');
+        blocks.forEach(b=>{
+          const time = b.querySelector('.time').textContent;
+          const label = b.querySelector('.small').textContent;
+          rows.push([day, time, label]);
+        });
+      });
+      const csv = rows.map(r=>r.map(cell=>'"'+cell.replace(/"/g,'""')+'"').join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'weekly_routine.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // initial render
+    renderWeek();
+  </script>
+</body>
+</html>
