@@ -43,19 +43,15 @@ void input(vector<int> &v)
 		cin >> i;
 }
 
-void printV(vi &v)
-{
-	for (auto it : v)
-	{
-		cerr << it << " ";
+void printV(vi &v) {
+	for(auto it:v) {
+		cerr<<it<<" ";
 	}
-	cerr << '\n';
+	cerr<<'\n';
 }
-void printM(map<int, int> &mp)
-{
-	for (auto it : mp)
-	{
-		cerr << it.first << " -> " << it.second << '\n';
+void printM(map<int, int>&mp) {
+	for(auto it:mp) {
+		cerr<<it.first<<" -> "<<it.second<<'\n';
 	}
 }
 
@@ -70,13 +66,16 @@ void PreSum(vector<int> &prefixSum, vector<int> &v, int n)
 
 void uttor()
 {
-	int a, v, l, n;
-	cin >> a >> v >> l >> n;
-	if(n<min(a,v)){
-		cout<<"YES"<<'\n';
-	}else{
-		cout<<"NO"<<'\n';
-	}
+	int n; cin>>n;
+	map<char, int>mp;
+	int lastChar = -1;
+	for(int i = 0; i < n; i++) {
+		char c; cin>>c;
+		mp[c]++;
+		if(i==n-1)lastChar = mp[c];
+	}	
+	cout<<(n - lastChar)<<'\n';
+
 }
 
 int32_t main()

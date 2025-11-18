@@ -24,7 +24,7 @@ const int mod = 1e9 + 7;
 #define vtd vector<vector<int>>
 #define vp vector<pair<int, int>>
 #define pqu priority_queue<int>
-#define all(x) x.begin(), x.end()
+#define all(x) x.begin(), x.end() - 1
 #define setbit(n) __builtin_popcount(n);
 
 bool cmp(pair<int, int> &x, pair<int, int> &y)
@@ -43,19 +43,15 @@ void input(vector<int> &v)
 		cin >> i;
 }
 
-void printV(vi &v)
-{
-	for (auto it : v)
-	{
-		cerr << it << " ";
+void printV(vi &v) {
+	for(auto it:v) {
+		cerr<<it<<" ";
 	}
-	cerr << '\n';
+	cerr<<'\n';
 }
-void printM(map<int, int> &mp)
-{
-	for (auto it : mp)
-	{
-		cerr << it.first << " -> " << it.second << '\n';
+void printM(map<int, int>&mp) {
+	for(auto it:mp) {
+		cerr<<it.first<<" -> "<<it.second<<'\n';
 	}
 }
 
@@ -70,13 +66,23 @@ void PreSum(vector<int> &prefixSum, vector<int> &v, int n)
 
 void uttor()
 {
-	int a, v, l, n;
-	cin >> a >> v >> l >> n;
-	if(n<min(a,v)){
-		cout<<"YES"<<'\n';
-	}else{
-		cout<<"NO"<<'\n';
+	int n, q; cin>>n>>q;
+	map<int,int>mp;
+	vector<int>v(n+1);
+	for(int i = 0; i<n; i++) {
+		v[i] = i+1;
 	}
+	vector<int>gap(n);
+	while(q--) {
+		int i, x; cin>>i>>x;
+		mp[i - 1] +=x;
+		gap[i - 1]  = max(gap[i - 1], mp[i - 1] - mp[i]);
+
+	}
+	for(int i = 1; i<n; i++) {
+		v[i] = v[i - 1] + gap[i - 1] + 1;
+	}
+	cout<<accumulate(all(v), 0LL)<<'\n';
 }
 
 int32_t main()
@@ -85,7 +91,7 @@ int32_t main()
 	cin.tie(0);
 	cout.tie(0);
 	int tc = 1;
-	cin >> tc;
+	//cin >> tc;
 	for (int t = 1; t <= tc; t++)
 	{
 		// cout << "Case #" << t << ": ";
